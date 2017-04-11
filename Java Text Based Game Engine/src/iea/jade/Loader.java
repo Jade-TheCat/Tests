@@ -10,6 +10,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Scanner;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Loader {
@@ -18,6 +20,7 @@ public class Loader {
     private static File dataDir = new File(workingDir + "/data");
     
     private static File gameJson = new File(dataDir + "/game.json");
+    private static File gameDataDir = new File(dataDir + "/game");
     private static JSONObject game;
     
     
@@ -37,10 +40,32 @@ public class Loader {
                 }
                 game = new JSONObject(t);
             } catch (Exception e) {
-                e.printStackTrace();
+                if (e instanceof JSONException) {
+                    
+                    System.out.println("The Game file is corrupt or not valid! Please check the JSON syntax or contact the developer.");
+                }
             }
-            
-            System.out.printf("Loading %s%n", game.getString("name"));
+            if (game != null) {
+                System.out.printf("Loading %s, version %s%n", game.getString("name"), game.getString("version"));
+            }
+        }
+        init();
+    }
+    
+    public static void init() {
+        if (game == null) {
+            Scanner s = new Scanner(System.in);
+            System.out.print("There is no game loaded. Would you like to select a custom file? (y/n)");
+            String string = s.next();
+            boolean b = string.equalsIgnoreCase("y");
+            if (b) {
+                System.out.print("Please type the name of the json file for the game:");
+                gameJson = new File(dataDir + "/" + s.next());
+                preInit();
+            } else {
+                System.out.println("No game shall be loaded. Closing...");
+            }
         }
     }
 }
+
